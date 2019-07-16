@@ -1,49 +1,37 @@
-<?php 
-function line_notify($Token, $message)
-{
-        $lineapi = $Token; // ãÊè token key ·Õèä´éÁÒ
-	$mms =  trim($message); // ¢éÍ¤ÇÒÁ·ÕèµéÍ§¡ÒÃÊè§
-	date_default_timezone_set("Asia/Bangkok");
-	$chOne = curl_init(); 
-	curl_setopt( $chOne, CURLOPT_PROXY, "http://proxy.egat.co.th:8080"); 
-	curl_setopt( $chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify"); 
-	// SSL USE 
-	curl_setopt( $chOne, CURLOPT_SSL_VERIFYHOST, 0); 
-	curl_setopt( $chOne, CURLOPT_SSL_VERIFYPEER, 0); 
-	//POST 
-	curl_setopt( $chOne, CURLOPT_POST, 1); 
-	curl_setopt( $chOne, CURLOPT_POSTFIELDS, "message=$mms"); 
-	//curl_setopt( $chOne, CURLOPT_POSTFIELDS, "message=$mms&imageThumbnail=http://www.sirikitdam.egat.com/sk_plant/water/images/sk_ong.jpg&imageFullsize=http://www.sirikitdam.egat.com/sk_plant/water/images/sk_ong.jpg"); 
-//curl_setopt( $chOne, CURLOPT_POSTFIELDS, "message=$mms&imageThumbnail=http://www.sirikitdam.egat.com/sk_plant/water/images/ong1.jpg&imageFullsize=http://www.sirikitdam.egat.com/sk_plant/water/images/ong1.jpg&stickerPackageId=1&stickerId=99"); 
-
-	curl_setopt( $chOne, CURLOPT_FOLLOWLOCATION, 1); 
-	$headers = array( 'Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer '.$lineapi.'', );
-        curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers); 
-	curl_setopt( $chOne, CURLOPT_RETURNTRANSFER, 1); 
-	$result = curl_exec( $chOne ); 
-	//Check error 
-	if(curl_error($chOne)) 
-	{ 
-           echo 'error:' . curl_error($chOne); 
-	} 
-	else { 
-	$result_ = json_decode($result, true); 
-	   echo "status : ".$result_['status']; echo "message : ". $result_['message'];
-        } 
-	curl_close( $chOne );   
-}
-//$message = "ÊÇÑÊ´Õ¤ÃÑº GER&stickerPackageId=2&stickerId=167"; sorry &stickerPackageId=1&stickerId=107";
-$message = array("·´ÊÍº Sticker&imageThumbnail=https://vk.com/images/stickers/36/128.png&imageFullsize=https://vk.com/images/stickers/36/128.png");
-$Token = "ldAxAPwRhs4oZf6cPWEqKqEsqDL8tjg4lrTzWuS0fVR"; //¡Ð2
-for ($i=0;$i <=1;$i++){
-	//echo $i."--".$message[$i];
-line_notify($Token, $message[$i]);
-}
-//$Token1 = "BKmk5ErzKDXlJsQ1wl22yG045MfViWxgnocAn9GLYFK"; // control room
-//line_notify($Token1, $message);
-//$Token3 = "i6SrPFVwSwxwdhvl8v4rPcPKxEveXqJ2O3OIDbVDwSa"; //hydro
-//line_notify($Token3, $message);
-//$Token4 = "w5E0gwwb2jhvKShpl7h6kh0RqvHR8VTf9I3BGpJw1hm"; //¼Ò«èÍÁ
-//line_notify($Token4, $message);
-
+<?php
+header('Content-Type: text/html; charset=utf-8');
+date_default_timezone_set("Asia/Bangkok");
+$mytime = date("H:i");
+if($mytime >="01:00" && $mytime <= "18:59"){
+        $userId = "ldAxAPwRhs4oZf6cPWEqKqEsqDL8tjg4lrTzWuS0fVR";
+                $strAccessToken = "8Lg+b3u0aF0TiheDr/QcHGTl8dUs/WyJ3mTWXHOXWzoWLwiE9qafKtnHGkfOZqDT/91i3Vb5zrx9SCDfe1th/Ad6bfbmxgY+RLCpURlW4S/2kLJFZCcINptLYSZUufA6wGDfAduIgzXBC4hQS1SZlgdB04t89/1O/w1cDnyilFU=";
+                $txt = file_get_contents("http://dam.egat.co.th/line_data/auto_bb_sk_line_c.php");
+				//$txt = "à¸‚à¸­à¸šà¸„à¸¸à¸“ ";
+                $txt1 = $txt."\r\n Update à¸‚à¹‰à¸­à¸¡à¸¹à¸¥ \r\n http://10.242.1.50/sk/sk_plan.php";
+                $strUrl = "https://api.line.me/v2/bot/message/push";
+                $arrHeader = array();
+                $arrHeader[] = "Content-Type: application/json";
+                $arrHeader[] = "Authorization: Bearer {$strAccessToken}";
+                $arrPostData['to'] = $userId;
+                $arrPostData['messages'][0]['type'] = "text";
+                $arrPostData['messages'][0]['text'] = $txt1;
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL,$strUrl);
+                curl_setopt($ch, CURLOPT_HEADER, false);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $arrHeader);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($arrPostData));
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                $result = curl_exec($ch);
+                curl_close ($ch);
+                 
+        echo "Send Line BB OK---<br/>";
+        sleep(10);//seconds to wait..
+        header("Location:https://sirikitdam.herokuapp.com/close.htm");
+} else {
+        echo "No Time Send".$mytime;
+         sleep(5);//seconds to wait..
+        header("Location:https://sirikitdam.herokuapp.com/close.htm");
+        }
 ?>
